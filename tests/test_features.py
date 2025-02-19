@@ -1,4 +1,4 @@
-from aim5005.features import MinMaxScaler, StandardScaler
+from aim5005.features import MinMaxScaler, StandardScaler, LabelEncoder
 import numpy as np
 import unittest
 from unittest.case import TestCase
@@ -51,6 +51,7 @@ class TestFeatures(TestCase):
         data = [[0, 0], [0, 0], [1, 1], [1, 1]]
         expected = np.array([[-1., -1.], [-1., -1.], [1., 1.], [1., 1.]])
         scaler.fit(data)
+        result = scaler.transform(data)
         assert (result == expected).all(), "Scaler transform does not return expected values. Expect {}. Got: {}".format(expected.reshape(1,-1), result.reshape(1,-1))
         
     def test_standard_scaler_single_value(self):
@@ -62,6 +63,43 @@ class TestFeatures(TestCase):
         assert (result == expected).all(), "Scaler transform does not return expected values. Expect {}. Got: {}".format(expected.reshape(1,-1), result.reshape(1,-1))
 
     # TODO: Add a test of your own below this line
+    def test_standard_scaler_get_standard_deviation(self):
+        scaler = StandardScaler()
+        data = [[0, 0], [0, 0], [1, 1], [1, 1]]
+        expected = np.array([0.5, 0.5])
+        scaler.fit(data)
+        assert (scaler.std == expected).all(), "scaler fit does not return expected standard deviation {}. Got {}".format(expected, scaler.std)
+
+    def test_label_encoder_init(self):
+        le = LabelEncoder()
+        assert isinstance(le, LabelEncoder), "le is not a LabelEncoder object"
+
+    def test_label_encoder_classes_(self):
+        le = LabelEncoder()
+        data = ['a', 'b', 'c', 'a', 'b', 'c']
+        expected = np.array(['a', 'b', 'c'])
+        le.fit(data)
+        assert (le.classes_ == expected).all(), "le fit does not return expected classes. Expected {}, Got {}".format(expected, le.classes_)
     
+    def test_label_encoder_transform(self):
+        le = LabelEncoder()
+        data = ['a', 'b', 'c', 'a', 'b', 'c']
+        expected = np.array([0, 1, 2, 0, 1, 2])
+        le.fit(data)
+        result = le.transform(data)
+        assert (result == expected).all(), "le transform does not return expected values. Expected {}. Got: {}".format(expected, result)  
+
+    def test_label_encoder_unseen_class(self):
+        le = LabelEncoder()
+        data = ['a', 'b', 'c', 'a', 'b', 'c']
+        le.fit(data)
+        try:
+            result = le.transform(['d'])
+        except ValueError:
+            ...
+        else:
+            print(f"le transform did not raise an ValueError when an unseen class was passed.")
+
+
 if __name__ == '__main__':
     unittest.main()
